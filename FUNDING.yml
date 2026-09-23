@@ -1,7 +1,7 @@
-# These are placeholders — replace with your real usernames, then delete any lines you don't use.
-# This file must live at: .github/FUNDING.yml (note the dot-folder) in your repo.
+# GitHub Sponsors requires Stripe Connect, which isn't available in Morocco yet —
+# leaving this commented out until/unless that changes.
+# github: [4mintimeout]
 
-github: [your-github-username]
-ko_fi: your-kofi-username
+ko_fi: 4mintimeout
 # buy_me_a_coffee: your-bmc-username
 # custom: ["https://your-custom-donate-link.com"]

@@ -1,6 +1,6 @@
 # MoneyTracker Lite
 
-[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-red)](https://github.com/sponsors/4mintimeout)
+[![Ko-fi](https://img.shields.io/badge/Support-Ko--fi-red)](https://ko-fi.com/4mintimeout)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 A free, offline, fully-encrypted personal finance tracker for Windows. Log expenses and income, track recurring transactions, plan savings, and manage budgets — all stored locally on your machine, encrypted, no account, no cloud, no tracking.
@@ -35,9 +35,8 @@ npm run dist        # build the Windows installer (output in dist/)
 
 MoneyTracker Lite is free and always will be. If it's useful to you, consider supporting development:
 
-- [GitHub Sponsors](https://github.com/sponsors/4mintimeout)
-- [Ko-fi](https://ko-fi.com/4mintimeout)
+- [Ko-fi](https://ko-fi.com/4mintimeout) ☕
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT see [LICENSE](LICENSE).
