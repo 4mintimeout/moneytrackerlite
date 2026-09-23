@@ -1,0 +1,27 @@
+# Dependencies (regenerated via `npm install`)
+node_modules/
+
+# Build output (regenerated via `npm run dist`)
+dist/
+release/
+
+# Environment / local config
+.env
+.env.local
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+
+# electron-builder cache
+.electron-builder-cache/
