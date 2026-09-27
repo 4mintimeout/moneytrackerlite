@@ -19,7 +19,8 @@
     "files": [
       "main.js",
       "preload.js",
-      "src/**/*"
+      "src/**/*",
+      "build/**/*"
     ],
     "win": {
       "target": [
