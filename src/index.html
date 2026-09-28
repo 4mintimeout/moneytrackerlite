@@ -5453,10 +5453,6 @@ function renderMoMBanner(currentOffset) {
   </div>`;
 }
 
-function dismissMoMNoData() {
-  localStorage.setItem('mt-mom-nodata-' + new Date().toISOString().slice(0, 7), '1');
-  renderMoMBanner(dashMonth);
-}
 
 // ── NEW MONTH FLOATING BANNER ──
 function renderNewMonthBanner() {
