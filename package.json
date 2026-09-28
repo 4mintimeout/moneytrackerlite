@@ -1,6 +1,6 @@
 {
   "name": "moneytracker-lite",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Personal finance tracker — offline & encrypted",
   "main": "main.js",
   "author": "M.Amine",
