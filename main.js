@@ -215,6 +215,15 @@ ipcMain.handle('get-paths', () => ({
   backup: backupPath(),
 }));
 
+// Fully quit the app (used by the "Log out / Quit" button in Settings).
+// Plain window.close() would just hide to tray (see the 'close' handler
+// above), so isQuiting must be set first for app.quit() to actually exit,
+// including removing the tray icon and ending the background process.
+ipcMain.handle('quit-app', () => {
+  app.isQuiting = true;
+  app.quit();
+});
+
 // Hard relaunch — fully restarts the Electron process so no stale JS
 // state survives (used after New Account reset)
 ipcMain.handle('relaunch', () => {

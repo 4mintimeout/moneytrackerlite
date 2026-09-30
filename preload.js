@@ -25,6 +25,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Hard relaunch the app (used after New Account reset so JS state is fully wiped)
   relaunch: () => ipcRenderer.invoke('relaunch'),
 
+  // Fully quit the app, including the tray icon and background process
+  // (used by the "Log out / Quit" button in Settings)
+  quitApp: () => ipcRenderer.invoke('quit-app'),
+
   // Delete disk data files (used during reset and setup conflict resolution)
   deleteData: () => ipcRenderer.invoke('delete-data'),
 });

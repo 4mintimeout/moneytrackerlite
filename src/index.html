@@ -732,6 +732,8 @@ if (!isElectron && 'serviceWorker' in navigator) {
   .lock-btn:active { transform:translateY(0); }
   .lock-error { font-size:12px; color:var(--red); height:16px; text-align:center; }
   .lock-hint  { font-size:11px; color:var(--text-4); text-align:center; line-height:1.6; }
+  .lock-forgot { background:none; border:none; color:var(--text-3); font-size:12px; font-family:inherit; text-decoration:underline; cursor:pointer; padding:4px 8px; margin-top:4px; display:none; }
+  .lock-forgot:hover { color:var(--text-1); }
   .lock-setup-toggle { font-size:12px; color:var(--accent); cursor:pointer; background:none; border:none; font-family:var(--sans); text-decoration:underline; }
   @keyframes shake {
     0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 60%{transform:translateX(6px)}
@@ -1042,6 +1044,17 @@ if (!isElectron && 'serviceWorker' in navigator) {
     <div class="lock-error" id="lock-error"></div>
     <button class="lock-btn" onclick="submitLock()" id="lock-btn-label">Déverrouiller</button>
     <div class="lock-hint" id="lock-hint">Vos données sont chiffrées avec AES-256.</div>
+    <button type="button" class="lock-forgot" id="lock-forgot-btn" onclick="openForgotPassword()">Mot de passe oublié ?</button>
+  </div>
+  <div id="lock-backup-note" style="display:none;position:absolute;bottom:16px;left:16px;right:16px;text-align:center;font-size:11px;line-height:1.6;color:var(--text-4)"></div>
+</div>
+
+<!-- FIRST-TIME PASSWORD WARNING (z-index above lock screen) -->
+<div id="pwd-warn-overlay" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.6);backdrop-filter:blur(5px);align-items:center;justify-content:center;padding:16px">
+  <div class="modal" style="max-width:360px;text-align:center">
+    <h2 id="pwd-warn-title" style="margin-bottom:10px">⚠️ Important</h2>
+    <p id="pwd-warn-text" style="font-size:13px;line-height:1.6;color:var(--text-2);margin-bottom:16px"></p>
+    <button class="btn btn-primary" id="pwd-warn-ok" onclick="closePwdWarn()" style="width:100%">OK</button>
   </div>
 </div>
 
@@ -1852,6 +1865,9 @@ if (!isElectron && 'serviceWorker' in navigator) {
         <button class="data-btn data-btn-pwd" onclick="openChangePwd()">🔑 Changer le mot de passe</button>
         <button class="data-btn data-btn-lock" onclick="lockApp()">🔒 Verrouiller</button>
       </div>
+      <div class="data-btn-row" style="margin-bottom:10px">
+        <button class="data-btn" onclick="openQuitAppModal()" style="flex:1">🚪 Quitter l'application</button>
+      </div>
       <div class="data-btn-row">
         <button class="data-btn" style="background:rgba(248,113,113,0.10);color:var(--red);border:1px solid rgba(248,113,113,0.25);flex:1" onclick="openEraseDataModal()">🗑️ Effacer toutes les données</button>
         <button class="data-btn" style="background:rgba(245,158,11,0.10);color:var(--amber);border:1px solid rgba(245,158,11,0.25);flex:1" onclick="openNewAccountModal()">🔄 Nouveau compte</button>
@@ -2439,6 +2455,11 @@ async function _doSave() {
       incomes:    state.incomes,
       categories: state.categories,
       settings:   state.settings,
+      annualGoals: state.annualGoals || [],
+      annualBills: state.annualBills || [],
+      installments: state.installments || [],
+      deletedRecurringMonths: state.deletedRecurringMonths || {},
+      savingsWithdrawals: state.savingsWithdrawals || [],
     });
     // SEC-4 FIX: await the IPC call so disk-write failures are surfaced
     try {
@@ -2543,6 +2564,11 @@ async function initWithPassword(password) {
           if (parsed.incomes)    state.incomes    = parsed.incomes;
           if (parsed.categories) state.categories = parsed.categories;
           if (parsed.settings)   state.settings   = { ...state.settings, ...parsed.settings };
+          if (parsed.annualGoals)   state.annualGoals   = parsed.annualGoals;
+          if (parsed.annualBills)   state.annualBills   = parsed.annualBills;
+          if (parsed.installments)  state.installments  = parsed.installments;
+          if (parsed.deletedRecurringMonths) state.deletedRecurringMonths = parsed.deletedRecurringMonths;
+          if (parsed.savingsWithdrawals)     state.savingsWithdrawals     = parsed.savingsWithdrawals;
           _cryptoKey = key;
           await save(); // write everything to disk immediately
           return true;
@@ -4760,6 +4786,32 @@ function startBfCountdown() {
   }
 }
 
+let _pwWarnAcked = false;
+
+function showPwdWarn() {
+  const isFr = navigator.language.startsWith('fr');
+  document.getElementById('pwd-warn-text').textContent = isFr
+    ? "Retenez bien votre mot de passe ou notez-le en lieu sûr. S'il est oublié, il sera impossible de récupérer vos données."
+    : "Remember your password or write it down somewhere safe. If you forget it, there is no way to get back in.";
+  document.getElementById('pwd-warn-overlay').style.display = 'flex';
+  setTimeout(() => document.getElementById('pwd-warn-ok').focus(), 50);
+}
+
+function closePwdWarn() {
+  _pwWarnAcked = true;
+  document.getElementById('pwd-warn-overlay').style.display = 'none';
+  document.getElementById('lock-password').focus();
+}
+
+function showBackupNote() {
+  const isFr = navigator.language.startsWith('fr');
+  const n = document.getElementById('lock-backup-note');
+  n.textContent = isFr
+    ? '💾 Pensez à faire une sauvegarde régulière pour emporter vos données partout avec vous.'
+    : '💾 Remember to back up your data regularly so you can take it with you anywhere.';
+  n.style.display = '';
+}
+
 function initLockScreen() {
   const lang = navigator.language.startsWith('fr') ? 'fr' : 'en';
   const isFr = lang === 'fr';
@@ -4773,6 +4825,9 @@ function initLockScreen() {
     document.getElementById('lock-username').placeholder  = isFr ? 'Votre prénom…' : 'Your first name…';
     document.getElementById('lock-password').placeholder  = isFr ? 'Créez un mot de passe…' : 'Create a password…';
     document.getElementById('lock-name-wrap').style.display = 'block';
+    document.getElementById('lock-backup-note').style.display = 'none';
+    document.getElementById('lock-forgot-btn').style.display = 'none';
+    document.getElementById('lock-password').onfocus = () => { if (_lockMode === 'setup' && !_pwWarnAcked) showPwdWarn(); };
     setTimeout(() => document.getElementById('lock-username').focus(), 80);
   } else {
     _lockMode = 'unlock';
@@ -4783,6 +4838,10 @@ function initLockScreen() {
       : 'Your data is encrypted with AES-256.';
     document.getElementById('lock-password').placeholder  = isFr ? 'Mot de passe…' : 'Password…';
     document.getElementById('lock-name-wrap').style.display = 'none';
+    showBackupNote();
+    const forgotBtn = document.getElementById('lock-forgot-btn');
+    forgotBtn.textContent = isFr ? 'Mot de passe oublié ?' : 'Forgot password?';
+    forgotBtn.style.display = 'inline-block';
     // Check if already locked out from a previous session
     if (isBfLocked() || getBfAttempts() > 0) {
       startBfCountdown();
@@ -4934,6 +4993,26 @@ async function submitLock() {
   }
 }
 
+function openQuitAppModal() {
+  const isFr = state.settings.language === 'fr';
+  document.getElementById('quit-app-title').textContent = isFr ? "Quitter l'application" : 'Quit the app';
+  document.getElementById('quit-app-desc').textContent = isFr
+    ? "L'application va se fermer complètement, y compris l'icône dans la barre des tâches. Vos données sont déjà enregistrées automatiquement et seront protégées par votre mot de passe au prochain démarrage."
+    : 'The app will close completely, including the icon in the system tray. Your data is already saved automatically and will be protected by your password next time you open it.';
+  document.getElementById('btn-cancel-quit-app').textContent = isFr ? 'Annuler' : 'Cancel';
+  document.getElementById('btn-confirm-quit-app').textContent = isFr ? '🚪 Quitter' : '🚪 Quit';
+  openModal('quit-app-modal');
+}
+
+async function confirmQuitApp() {
+  // Data is already saved on every change (see save()), so nothing to flush here.
+  if (window.electronAPI?.quitApp) {
+    await window.electronAPI.quitApp();
+  } else {
+    window.close(); // web/dev fallback, not used in the packaged Electron app
+  }
+}
+
 function lockApp() {
   // STAB-3 FIX: flush any pending undo/delete before wiping state
   if (_undoStack) {
@@ -4959,6 +5038,10 @@ function lockApp() {
   // Always hide the name field — lockApp() is only ever called on an
   // already-set-up account, never on first run.
   document.getElementById('lock-name-wrap').style.display = 'none';
+  showBackupNote();
+  const forgotBtn = document.getElementById('lock-forgot-btn');
+  forgotBtn.textContent = navigator.language.startsWith('fr') ? 'Mot de passe oublié ?' : 'Forgot password?';
+  forgotBtn.style.display = 'inline-block';
   // Resume countdown if still locked out
   if (isBfLocked() || getBfAttempts() > 0) {
     startBfCountdown();
@@ -7687,6 +7770,7 @@ function openNewAccountModal() {
   const isFr = state.settings.language === 'fr';
   const confirmWord = 'RESET';
   document.getElementById('new-account-title').textContent = isFr ? 'Nouveau compte' : 'New Account';
+  document.getElementById('new-account-warn').textContent = isFr ? '⚠️ Toutes les données seront effacées' : '⚠️ All data will be erased';
   document.getElementById('new-account-desc').textContent = isFr
     ? 'Ceci supprimera toutes vos données et réinitialisera l\'application comme si c\'était la première fois. Vous pourrez définir un nouveau mot de passe au redémarrage.'
     : 'This will delete all your data and reset the app as if it\'s brand new. You can set a new password on next launch.';
@@ -7697,6 +7781,26 @@ function openNewAccountModal() {
   document.getElementById('btn-cancel-new-account').textContent = isFr ? 'Annuler' : 'Cancel';
   document.getElementById('btn-confirm-new-account').textContent = isFr ? '🔄 Réinitialiser' : '🔄 Reset';
   closeModal('settings-modal');
+  openModal('new-account-modal');
+}
+
+// Lock-screen entry point for a forgotten password. Reuses the New Account
+// modal + confirmNewAccount(), which already wipes all data and relaunches
+// into first-run setup. Language comes from the OS, not state.settings,
+// because encrypted settings can't be read before login.
+function openForgotPassword() {
+  const isFr = navigator.language.startsWith('fr');
+  document.getElementById('new-account-title').textContent = isFr ? 'Mot de passe oublié' : 'Forgot password';
+  document.getElementById('new-account-warn').textContent  = isFr ? '⚠️ Toutes les données seront effacées' : '⚠️ All data will be erased';
+  document.getElementById('new-account-desc').textContent  = isFr
+    ? "Vos données sont chiffrées avec votre mot de passe : sans lui, elles ne peuvent pas être récupérées. Vous pouvez tout effacer et repartir de zéro avec un nouveau mot de passe, puis restaurer une sauvegarde si vous en avez une (Paramètres). Cette action est irréversible."
+    : "Your data is encrypted with your password, so it cannot be recovered without it. You can erase everything and start over with a new password, then restore a backup if you have one (Settings). This cannot be undone.";
+  document.getElementById('new-account-confirm-label').innerHTML = isFr
+    ? 'Tapez <strong>RESET</strong> pour confirmer :'
+    : 'Type <strong>RESET</strong> to confirm:';
+  document.getElementById('new-account-confirm-input').value = '';
+  document.getElementById('btn-cancel-new-account').textContent  = isFr ? 'Annuler' : 'Cancel';
+  document.getElementById('btn-confirm-new-account').textContent = isFr ? '🔄 Réinitialiser' : '🔄 Reset';
   openModal('new-account-modal');
 }
 
@@ -8362,12 +8466,6 @@ function _positionTour(targetId) {
   card.style.left = left + 'px';
   card.style.top  = top  + 'px';
 }
-  spotlight.style.left   = (rect.left   - pad) + 'px';
-  spotlight.style.top    = (rect.top    - pad) + 'px';
-  spotlight.style.width  = (rect.width  + pad * 2) + 'px';
-  spotlight.style.height = (rect.height + pad * 2) + 'px';
-
-  // Measure the card's actual rendered size
 
 function tourNext() {
   const steps = _getTourSteps();
@@ -8561,12 +8659,28 @@ applyLanguage = function() {
   </div>
 </div>
 
+<!-- QUIT APP MODAL -->
+<div class="overlay" id="quit-app-modal" role="dialog" aria-modal="true" aria-labelledby="quit-app-title">
+  <div class="modal" style="max-width:420px">
+    <h2>🚪 <span id="quit-app-title">Quitter l'application</span></h2>
+    <div style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.15);border-radius:10px;padding:14px 16px;margin-bottom:16px">
+      <p style="font-size:13px;color:var(--text-2);line-height:1.65" id="quit-app-desc">
+        L'application va se fermer complètement, y compris l'icône dans la barre des tâches. Vos données sont déjà enregistrées automatiquement et seront protégées par votre mot de passe au prochain démarrage.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('quit-app-modal')" id="btn-cancel-quit-app">Annuler</button>
+      <button class="btn btn-primary" onclick="confirmQuitApp()" id="btn-confirm-quit-app">🚪 Quitter</button>
+    </div>
+  </div>
+</div>
+
 <!-- NEW ACCOUNT MODAL -->
-<div class="overlay" id="new-account-modal" role="dialog" aria-modal="true" aria-labelledby="new-account-title">
+<div class="overlay" id="new-account-modal" style="z-index:10001" role="dialog" aria-modal="true" aria-labelledby="new-account-title">
   <div class="modal" style="max-width:420px">
     <h2>🔄 <span id="new-account-title">Nouveau compte</span></h2>
     <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:14px 16px;margin-bottom:16px">
-      <p style="font-size:13px;color:var(--amber);font-weight:600;margin-bottom:6px">⚠️ Toutes les données seront effacées</p>
+      <p style="font-size:13px;color:var(--amber);font-weight:600;margin-bottom:6px" id="new-account-warn">⚠️ Toutes les données seront effacées</p>
       <p style="font-size:13px;color:var(--text-2);line-height:1.65" id="new-account-desc">
         Ceci supprimera toutes vos données et réinitialisera l'application comme si c'était la première fois. Vous pourrez définir un nouveau mot de passe au redémarrage.
       </p>
