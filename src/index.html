@@ -262,9 +262,6 @@ if (!isElectron && 'serviceWorker' in navigator) {
   .balance-label { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 6px; }
   .balance-amount { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; font-family: var(--mono); }
   .balance-side-stats { display:flex; gap:18px; margin-top:10px; }
-  .balance-side-stat { display:flex; flex-direction:column; gap:2px; }
-  .balance-side-label { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-4); }
-  .balance-side-value { font-size:17px; font-weight:700; font-family:var(--mono); letter-spacing:-0.3px; }
   .balance-sub { font-size: 14px; color: var(--text-3); margin-top: 6px; }
 
   .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
@@ -397,7 +394,6 @@ if (!isElectron && 'serviceWorker' in navigator) {
   .cat-card-budget { font-size:11px; color:var(--text-3); margin-bottom:10px; }
   .cat-card-bar { height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-bottom:6px; }
   .cat-card-bar-fill { height:100%; border-radius:2px; transition:width .4s ease; }
-  .cat-month-row { display:flex; align-items:center; gap:8px; }
 
   /* ── BILLS ── */
   .bills-summary { background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 24px; margin-bottom:16px; }
@@ -417,7 +413,6 @@ if (!isElectron && 'serviceWorker' in navigator) {
   .bucket-icon { width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
   .bucket-name { flex:1; font-size:14px; font-weight:600; color:var(--text-1); }
   .bucket-badge { font-size:10px; font-weight:600; padding:3px 8px; border-radius:20px; }
-  .bucket-total { font-size:15px; font-weight:700; font-family:var(--mono); color:var(--text-1); margin-left:6px; }
   .bucket-chevron { color:var(--text-4); font-size:11px; transition:transform .2s; }
   .bucket-chevron.open { transform:rotate(180deg); }
   .bucket-body { display:none; }
@@ -478,7 +473,6 @@ if (!isElectron && 'serviceWorker' in navigator) {
   .modal-footer .btn { flex:1; }
 
   /* ── SETTINGS ── */
-  .settings-wrap { max-width:560px; }
   .settings-section { background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:14px; }
   .settings-section h3 { font-size:13px; font-weight:600; color:var(--text-1); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
   .setting-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; }
@@ -734,7 +728,6 @@ if (!isElectron && 'serviceWorker' in navigator) {
   .lock-hint  { font-size:11px; color:var(--text-4); text-align:center; line-height:1.6; }
   .lock-forgot { background:none; border:none; color:var(--text-3); font-size:12px; font-family:inherit; text-decoration:underline; cursor:pointer; padding:4px 8px; margin-top:4px; display:none; }
   .lock-forgot:hover { color:var(--text-1); }
-  .lock-setup-toggle { font-size:12px; color:var(--accent); cursor:pointer; background:none; border:none; font-family:var(--sans); text-decoration:underline; }
   @keyframes shake {
     0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 60%{transform:translateX(6px)}
   }
@@ -872,7 +865,6 @@ if (!isElectron && 'serviceWorker' in navigator) {
 
   /* ── NOTE field ── */
   .tx-note { font-size:11px;color:var(--text-3);font-style:italic;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px; }
-  .tx-note-tag { display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:1px 6px;border-radius:3px;background:rgba(245,158,11,0.1);color:var(--amber);border:1px solid rgba(245,158,11,0.2); }
 
 
   /* ── DUE DATE STRIP ── */
@@ -905,12 +897,6 @@ if (!isElectron && 'serviceWorker' in navigator) {
   .goals-edit-btn { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 5px; border: 1px solid var(--border); background: none; color: var(--text-2); cursor: pointer; transition: all .15s; }
   .goals-edit-btn:hover { background: var(--bg-surface2); }
   .goal-item { margin-top: 10px; }
-  .goal-item-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; }
-  .goal-item-name { font-size: 13px; font-weight: 500; color: var(--text-1); display:flex; align-items:center; gap:6px; }
-  .goal-item-amounts { font-size: 12px; font-family: var(--mono); color: var(--text-3); }
-  .goal-bar-track { height: 5px; background: rgba(16,185,129,0.15); border-radius: 3px; overflow: hidden; }
-  .goal-bar-fill { height: 100%; border-radius: 3px; transition: width .5s ease; }
-  .goals-empty { font-size: 13px; color: var(--text-4); padding: 8px 0; }
 
 
   .digest-card {
@@ -1085,7 +1071,7 @@ if (!isElectron && 'serviceWorker' in navigator) {
 
 <!-- NEW MONTH FLOATING BANNER -->
 <div id="new-month-banner" class="hidden" role="status" aria-live="polite">
-  <span id="new-month-banner-text">🗓 Nouveau mois — aucune donnée du mois précédent pour l'instant.</span>
+  <span id="new-month-banner-text">🗓 Nouveau mois — bienvenue !</span>
   <button id="new-month-banner-close" onclick="dismissNewMonthBanner()" aria-label="Fermer">✕</button>
 </div>
 
@@ -1865,9 +1851,6 @@ if (!isElectron && 'serviceWorker' in navigator) {
         <button class="data-btn data-btn-pwd" onclick="openChangePwd()">🔑 Changer le mot de passe</button>
         <button class="data-btn data-btn-lock" onclick="lockApp()">🔒 Verrouiller</button>
       </div>
-      <div class="data-btn-row" style="margin-bottom:10px">
-        <button class="data-btn" onclick="openQuitAppModal()" style="flex:1">🚪 Quitter l'application</button>
-      </div>
       <div class="data-btn-row">
         <button class="data-btn" style="background:rgba(248,113,113,0.10);color:var(--red);border:1px solid rgba(248,113,113,0.25);flex:1" onclick="openEraseDataModal()">🗑️ Effacer toutes les données</button>
         <button class="data-btn" style="background:rgba(245,158,11,0.10);color:var(--amber);border:1px solid rgba(245,158,11,0.25);flex:1" onclick="openNewAccountModal()">🔄 Nouveau compte</button>
@@ -1879,6 +1862,12 @@ if (!isElectron && 'serviceWorker' in navigator) {
       <div class="setting-row">
         <span class="setting-label" id="txt-s-tutorial-desc">Revoir la visite guidée de l'application</span>
         <button class="btn btn-sm" style="background:var(--accent-s);color:var(--accent);border:1px solid rgba(99,102,241,0.25);font-size:12px;font-weight:600;padding:7px 14px;border-radius:9px;cursor:pointer;font-family:var(--sans);transition:all .15s" onclick="closeModal('settings-modal'); startTour();" id="btn-start-tour">▶ Lancer le tutoriel</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="data-btn-row">
+        <button class="data-btn" onclick="openQuitAppModal()" style="flex:1">🚪 Quitter l'application</button>
       </div>
     </div>
 
@@ -2292,7 +2281,6 @@ let currentPage = 'dashboard';
 let deleteTarget = null;
 let catDeleteTarget = null;
 let addModalType = 'expense';
-let billsOpenState = {};
 let billsGrid = true;
 
 // ══════════════════════════════════════════════════════════════════
@@ -2485,7 +2473,6 @@ async function _doSave() {
   try {
     await idbSet(encrypted);
     // Keep non-blob UI prefs in localStorage (tiny, never causes quota issues)
-    localStorage.setItem('mt-lite-v2-bills-open', JSON.stringify(billsOpenState));
     localStorage.setItem('mt-lite-v2-bills-grid', String(billsGrid));
   } catch (err) {
     console.error('Save failed — storage quota exceeded or denied:', err);
@@ -2587,7 +2574,6 @@ async function initWithPassword(password) {
     localStorage.removeItem('mt-pwd-check');
     state.categories = [...DEFAULT_CATEGORIES];
     state.settings.categoriesSeeded = true;
-    try { billsOpenState = JSON.parse(localStorage.getItem('mt-lite-v2-bills-open') || '{}'); } catch(e) {}
     billsGrid = localStorage.getItem('mt-lite-v2-bills-grid') !== 'false';
     await save();
     return true;
@@ -2638,7 +2624,6 @@ async function initWithPassword(password) {
     await save();
   }
 
-  try { billsOpenState = JSON.parse(localStorage.getItem('mt-lite-v2-bills-open') || '{}'); } catch(e) {}
   billsGrid = localStorage.getItem('mt-lite-v2-bills-grid') !== 'false';
   setTimeout(() => cleanupStoredRecurringClones(), 500);
   return true;
@@ -2706,12 +2691,6 @@ function formatTime(iso) {
   const day = d.toLocaleDateString(lang, { day: 'numeric', month: 'short' });
   const time = d.toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' });
   return `${day} ${time}`;
-}
-
-function isSameMonth(iso, offset) {
-  const d = new Date(iso), v = getViewDate(offset);
-  // Use LOCAL date components — ISO strings are UTC and can land in the wrong month for non-UTC timezones
-  return d.getFullYear() === v.getFullYear() && d.getMonth() === v.getMonth();
 }
 
 // ── VIRTUAL RECURRING HELPERS ──
@@ -3835,7 +3814,6 @@ function renderBills() {
     const safeColor = sanitizeColor(cat.color); // FIX C-1: sanitize color before any style injection
     const exps = [...(buckets[cat.id]||[])].sort((a,b) => new Date(b.date)-new Date(a.date));
     const total = exps.reduce((s,e)=>s+e.amount,0);
-    const isOpen = cat.id in billsOpenState ? billsOpenState[cat.id] : idx < 2;
     const byDate = {};
     exps.forEach(e => { const k = e.date.slice(0,10); if(!byDate[k]) byDate[k]=[]; byDate[k].push(e); });
 
@@ -3907,13 +3885,6 @@ function renderBills() {
 
   html += '</div>';
   container.innerHTML = html;
-}
-
-function toggleBucket(id) {
-  const isOpen = id in billsOpenState ? billsOpenState[id] : true;
-  billsOpenState[id] = !isOpen;
-  localStorage.setItem('mt-lite-v2-bills-open', JSON.stringify(billsOpenState));
-  renderBills();
 }
 
 function toggleBillsLayout() {
@@ -4645,17 +4616,6 @@ window.addEventListener('unhandledrejection', event => {
     }
   }
 });
-
-// FIX O-2: Render scheduler — coalesces rapid state mutations into a single rAF paint
-let _renderScheduled = false;
-function scheduleRender(page) {
-  if (_renderScheduled) return;
-  _renderScheduled = true;
-  requestAnimationFrame(() => {
-    renderPage(page || currentPage);
-    _renderScheduled = false;
-  });
-}
 
 // FIX O-3: Debounced transaction search — avoids re-render on every keystroke
 document.addEventListener('DOMContentLoaded', () => {
@@ -5544,21 +5504,21 @@ function renderNewMonthBanner() {
   const today = new Date();
   // Only show on day 1 of a new month
   if (today.getDate() !== 1) { banner.classList.add('hidden'); return; }
-  const monthKey = today.toISOString().slice(0, 7);
+  const monthKey = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
   const dismissKey = 'mt-newmonth-banner-' + monthKey;
   if (localStorage.getItem(dismissKey)) { banner.classList.add('hidden'); return; }
   const isFr = state.settings.language === 'fr';
   const monthName = today.toLocaleString(isFr ? 'fr-FR' : 'en-US', { month: 'long', year: 'numeric' });
   document.getElementById('new-month-banner-text').textContent =
     isFr
-      ? `🗓 Nouveau mois — bienvenue en ${monthName} ! Aucune donnée du mois précédent pour l'instant.`
-      : `🗓 New month — welcome to ${monthName}! No data from the previous month yet.`;
+      ? `🗓 Nouveau mois bienvenue en ${monthName} !`
+      : `🗓 New month welcome to ${monthName}!`;
   banner.classList.remove('hidden');
 }
 
 function dismissNewMonthBanner() {
   const today = new Date();
-  const monthKey = today.toISOString().slice(0, 7);
+  const monthKey = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
   localStorage.setItem('mt-newmonth-banner-' + monthKey, '1');
   const banner = document.getElementById('new-month-banner');
   if (banner) banner.classList.add('hidden');
