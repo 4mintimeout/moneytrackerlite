@@ -1008,6 +1008,11 @@ if (!isElectron && 'serviceWorker' in navigator) {
   }
   #tour-btn-next:hover { opacity: 0.88; }
 
+    /* Text-wrap fix: long names wrap inside their card; amounts never split across lines */
+    #sp-monthly-grid .card, #sp-annual-bills-list .card, #sp-installments-list .card { overflow-wrap: anywhere; }
+    #sp-monthly-grid .card > div[style*="space-between"] > span:last-child { white-space: nowrap; flex-shrink: 0; margin-inline-start: 6px; }
+    #sp-monthly-grid .card > div[style*="space-between"] > span:first-child { min-width: 0; }
+    .nw { white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -1332,7 +1337,7 @@ if (!isElectron && 'serviceWorker' in navigator) {
         <option value="desc" id="txt-sort-asc">Z→A</option>
       </select>
       <button onclick="filterUncategorized()" class="btn btn-ghost btn-sm" style="white-space:nowrap" title="Afficher uniquement les dépenses non catégorisées" data-i18n="s_uncategorized" data-i18n-title="s_show_uncategorized_expenses_on">⚠ Non catégorisé</button>
-      <button onclick="resetTxFilters()" id="tx-reset-filters" class="btn btn-danger btn-sm" style="display:none">✕ Réinitialiser</button>
+      <button onclick="resetTxFilters()" id="tx-reset-filters" class="btn btn-danger btn-sm" style="display:none" data-i18n="tx_reset_filters">✕ Réinitialiser</button>
     </div>
     <div class="table-wrap">
       <table>
@@ -2445,6 +2450,7 @@ const LANG = {
     btn_add_annual_bill: '+ Facture annuelle',
     btn_add_installment: '+ Paiement échelonné',
     sp_this_year: 'Cette année',
+    tx_reset_filters: '✕ Réinitialiser',
   },
   en: {
     s_undo: "Undo",
@@ -2730,6 +2736,7 @@ const LANG = {
     btn_add_annual_bill: '+ Annual bill',
     btn_add_installment: '+ Installment',
     sp_this_year: 'This year',
+    tx_reset_filters: '✕ Reset',
   },
   ar: {
     s_undo: "تراجع",
@@ -3015,6 +3022,7 @@ const LANG = {
     btn_add_annual_bill: '+ فاتورة سنوية',
     btn_add_installment: '+ دفعة بالتقسيط',
     sp_this_year: 'هذه السنة',
+    tx_reset_filters: '✕ إعادة تعيين',
   },
 };
 
@@ -3509,6 +3517,10 @@ function fmt(amount) {
     return `${amount.toFixed(2)} ${info.symbol}`;
   }
 }
+
+// Local-time date helpers (toISOString() is UTC and can return yesterday's date just after local midnight)
+function localDateStr(d) { d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function localMonthStr(d) { return localDateStr(d).slice(0, 7); }
 
 function getViewDate(offset) {
   const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() + offset); return d;
@@ -4676,7 +4688,7 @@ function openAddModal(type) {
   catSel.innerHTML = `<option value="">${t('uncategorized')}</option>` +
     state.categories.map(c => `<option value="${c.id}">${c.icon} ${escHtml(c.name)}</option>`).join('');
 
-  document.getElementById('add-date').value   = new Date().toISOString().slice(0,10);
+  document.getElementById('add-date').value   = localDateStr();
   document.getElementById('add-amount').value = '';
   document.getElementById('add-desc').value   = '';
   if (document.getElementById('add-note')) document.getElementById('add-note').value = '';
@@ -4760,7 +4772,7 @@ async function submitTransaction() {
 
   // Use real current time if user picked today, else noon for other days (timezone safety)
   const _now = new Date();
-  const _todayStr = _now.toISOString().slice(0, 10);
+  const _todayStr = localDateStr(_now);
   const finalDate = (date === _todayStr) ? _now.toISOString() : new Date(date + 'T12:00:00').toISOString();
 
   if (addModalType === 'income') {
@@ -5123,7 +5135,7 @@ function openEditModal(type, id) {
   document.getElementById('edit-income-fields').style.display  = isIncome ? 'block' : 'none';
   document.getElementById('edit-amount').value = record.amount;
   document.getElementById('edit-desc').value   = record.description;
-  document.getElementById('edit-date').value   = new Date(record.date).toISOString().slice(0,10);
+  document.getElementById('edit-date').value   = localDateStr(new Date(record.date));
   if (document.getElementById('edit-note')) document.getElementById('edit-note').value = record.note || '';
   if (document.getElementById('edit-recurring')) {
     document.getElementById('edit-recurring').value = record.recurring || '';
@@ -5177,7 +5189,7 @@ async function submitEditTransaction() {
 
   // Use real current time if user picked today, else noon for other days (timezone safety)
   const _editNow = new Date();
-  const _editTodayStr = _editNow.toISOString().slice(0, 10);
+  const _editTodayStr = localDateStr(_editNow);
   const editFinalDate = (date === _editTodayStr)
     ? _editNow.toISOString()
     : new Date(date + 'T12:00:00').toISOString();
@@ -5712,7 +5724,7 @@ async function exportData() {
     savingsWithdrawals: state.savingsWithdrawals || [],
   };
   const jsonStr = JSON.stringify(payload, null, 2);
-  const date = new Date().toISOString().slice(0,10);
+  const date = localDateStr();
   const name = (state.settings.name || 'moneytracker').toLowerCase().replace(/\s+/g,'-');
   const filename = `${name}-sauvegarde-${date}.json`;
   const isCapacitor = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
@@ -6010,7 +6022,7 @@ function exportCSV() {
   const blob = new Blob([bom + csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const date = new Date().toISOString().slice(0, 10);
+  const date = localDateStr();
   const name = (state.settings.name || 'moneytracker').toLowerCase().replace(/\s+/g, '-');
   a.href = url; a.download = `${name}-transactions-${date}.csv`; a.click();
   URL.revokeObjectURL(url);
@@ -6148,7 +6160,7 @@ function renderSpendingAlerts() {
   if (!el) return;
   // FIX 1: track dashMonth so alerts update with the viewed month, not always month 0
   const isCurrentMonth = dashMonth === 0;
-  const dismissKey = 'mt-alerts-dismissed-' + new Date().toISOString().slice(0,7); // month-scoped
+  const dismissKey = 'mt-alerts-dismissed-' + localMonthStr(); // month-scoped
   const dismissed = isCurrentMonth ? JSON.parse(localStorage.getItem(dismissKey) || '[]') : [];
 
   const alerts = [];
@@ -6187,7 +6199,7 @@ function renderSpendingAlerts() {
 }
 
 function dismissSpendingAlert(catId) {
-  const key = 'mt-alerts-dismissed-' + new Date().toISOString().slice(0,7); // month-scoped
+  const key = 'mt-alerts-dismissed-' + localMonthStr(); // month-scoped
   const dismissed = JSON.parse(localStorage.getItem(key) || '[]');
   dismissed.push(String(catId));
   localStorage.setItem(key, JSON.stringify(dismissed));
@@ -6212,7 +6224,7 @@ function renderDueSoonStrips() {
   if (!el) return;
   // Due strips are only relevant for the current month — suppress when browsing history
   if (dashMonth !== 0) { el.innerHTML = ''; return; }
-  const dismissedKey = 'mt-due-dismissed-' + new Date().toISOString().slice(0,10);
+  const dismissedKey = 'mt-due-dismissed-' + localDateStr();
   const dismissed = JSON.parse(localStorage.getItem(dismissedKey) || '[]');
 
   const today = new Date();
@@ -6289,7 +6301,7 @@ function renderDueSoonStrips() {
 }
 
 function dismissDueStrip(id) {
-  const key = 'mt-due-dismissed-' + new Date().toISOString().slice(0,10);
+  const key = 'mt-due-dismissed-' + localDateStr();
   const dismissed = JSON.parse(localStorage.getItem(key) || '[]');
   dismissed.push(String(id));
   localStorage.setItem(key, JSON.stringify(dismissed));
@@ -6388,7 +6400,7 @@ function renderMonthlyDigest() {
   const today = new Date();
   if (today.getDate() > 7) { el.innerHTML = ''; return; }
 
-  const dismissKey = 'mt-digest-dismissed-' + today.toISOString().slice(0,7);
+  const dismissKey = 'mt-digest-dismissed-' + localMonthStr(today);
   if (localStorage.getItem(dismissKey)) { el.innerHTML = ''; return; }
 
   // Last month data (offset -1)
@@ -6458,7 +6470,7 @@ function renderMonthlyDigest() {
 }
 
 function dismissDigest() {
-  const key = 'mt-digest-dismissed-' + new Date().toISOString().slice(0,7);
+  const key = 'mt-digest-dismissed-' + localMonthStr();
   localStorage.setItem(key, '1');
   const el = document.getElementById('digest-container');
   if (el) el.innerHTML = '';
@@ -6971,7 +6983,7 @@ function renderSavingsPlan() {
         <div style="font-size:13px;font-weight:700;color:${isCurrent?'var(--accent)':'var(--text-2)'}">${mName}${isCurrent?' ◉':''}</div>
         <div style="font-size:12px;font-weight:700;color:${netColor}" title="${tr('Surplus mensuel moins obligations du plan (factures dues + mensualités)','Monthly surplus minus plan obligations (bills due + installments)')}">${netDisplay} <span style="font-weight:400;opacity:0.6;font-size:10px">${netLabel}</span></div>
       </div>
-      <div style="font-size:12px;color:var(--text-3)">${incDisplay} · ${expDisplay}</div>
+      <div style="font-size:12px;color:var(--text-3)"><span class="nw">${incDisplay}</span> · <span class="nw">${expDisplay}</span></div>
       ${noIncomeHint}
       ${billsDue.map(b=>{
         const paidFromSav = isBillPaidFromSavings(b.id, viewYear);
