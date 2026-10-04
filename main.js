@@ -41,9 +41,15 @@ function createWindow() {
   mainWindow.once('ready-to-show', () => mainWindow.show());
   Menu.setApplicationMenu(null);
 
+  // Only plain web links may leave the app (never file:, javascript:, custom protocols...)
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url);
+    if (/^https?:\/\//i.test(url)) shell.openExternal(url);
     return { action: 'deny' };
+  });
+
+  // The window must never navigate away from the app's own page
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (url !== mainWindow.webContents.getURL()) event.preventDefault();
   });
 
   mainWindow.on('close', (e) => {

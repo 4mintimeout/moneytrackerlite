@@ -1044,6 +1044,7 @@ if (!isElectron && 'serviceWorker' in navigator) {
       min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .nw { white-space: nowrap; }
+    .month-nav button:disabled { opacity: .3; cursor: not-allowed; pointer-events: none; }
     /* Form validation feedback */
     .field-invalid { border-color: var(--red) !important; box-shadow: 0 0 0 3px rgba(248,113,113,0.15); animation: shake .3s ease; }
     .form-error-msg { display: none; color: var(--red); font-size: 12px; font-weight: 600; margin: 12px 0 0; }
@@ -1198,9 +1199,9 @@ if (!isElectron && 'serviceWorker' in navigator) {
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <div class="month-nav" id="dash-month-nav">
-          <button onclick="changeMonth(-1)">‹</button>
+          <button id="dash-month-prev" onclick="changeMonth(-1)">‹</button>
           <span class="ml" id="dash-month-label">—</span>
-          <button onclick="changeMonth(1)">›</button>
+          <button id="dash-month-next" onclick="changeMonth(1)">›</button>
         </div>
         <button class="today-btn" id="dash-today-btn" onclick="resetMonth()" style="display:none">Aujourd'hui</button>
       </div>
@@ -1324,14 +1325,14 @@ if (!isElectron && 'serviceWorker' in navigator) {
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <div class="month-nav">
-          <button onclick="changeTxMonth(-1)">‹</button>
+          <button id="tx-month-prev" onclick="changeTxMonth(-1)">‹</button>
           <span class="ml" id="tx-month-label">—</span>
-          <button onclick="changeTxMonth(1)">›</button>
+          <button id="tx-month-next" onclick="changeTxMonth(1)">›</button>
         </div>
         <div class="month-nav">
-          <button onclick="changeTxYear(-1)">‹</button>
+          <button id="tx-year-prev" onclick="changeTxYear(-1)">‹</button>
           <span class="ml" id="tx-year-label">—</span>
-          <button onclick="changeTxYear(1)">›</button>
+          <button id="tx-year-next" onclick="changeTxYear(1)">›</button>
         </div>
         <button class="today-btn" id="tx-today-btn" onclick="resetTxMonth()" style="display:none">Aujourd'hui</button>
         <button data-i18n="add_income_btn" class="btn btn-sm" style="background:var(--green-s);color:var(--green)" onclick="openAddModal('income')" id="txt-add-income">+ Revenu</button>
@@ -1412,9 +1413,9 @@ if (!isElectron && 'serviceWorker' in navigator) {
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <div class="month-nav">
-          <button onclick="changeCatMonth(-1)">‹</button>
+          <button id="cat-month-prev" onclick="changeCatMonth(-1)">‹</button>
           <span class="ml" id="cat-month-label">—</span>
-          <button onclick="changeCatMonth(1)">›</button>
+          <button id="cat-month-next" onclick="changeCatMonth(1)">›</button>
         </div>
         <button class="today-btn" id="cat-today-btn" onclick="resetCatMonth()" style="display:none">Aujourd'hui</button>
         <button data-i18n="new_cat" class="btn btn-sm btn-primary" onclick="openCatModal()" id="txt-new-cat">+ Nouvelle</button>
@@ -1436,14 +1437,14 @@ if (!isElectron && 'serviceWorker' in navigator) {
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <div class="month-nav">
-          <button onclick="changeBillsMonth(-1)">‹</button>
+          <button id="bills-month-prev" onclick="changeBillsMonth(-1)">‹</button>
           <span class="ml" id="bills-month-label">—</span>
-          <button onclick="changeBillsMonth(1)">›</button>
+          <button id="bills-month-next" onclick="changeBillsMonth(1)">›</button>
         </div>
         <div class="month-nav">
-          <button onclick="changeBillsYear(-1)">‹</button>
+          <button id="bills-year-prev" onclick="changeBillsYear(-1)">‹</button>
           <span class="ml" id="bills-year-label">—</span>
-          <button onclick="changeBillsYear(1)">›</button>
+          <button id="bills-year-next" onclick="changeBillsYear(1)">›</button>
         </div>
         <button class="today-btn" id="bills-today-btn" onclick="resetBillsMonth()" style="display:none">Aujourd'hui</button>
         <button class="btn btn-sm" style="background:var(--red-s);color:var(--red)" onclick="openAddModal('expense')" data-i18n="s_expense_2">+ Dépense</button>
@@ -1467,9 +1468,9 @@ if (!isElectron && 'serviceWorker' in navigator) {
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <div class="month-nav" id="sp-year-nav">
-          <button onclick="changeSpYear(-1)">‹</button>
+          <button id="sp-year-prev" onclick="changeSpYear(-1)">‹</button>
           <span class="ml" id="sp-year-label" style="min-width:60px">—</span>
-          <button onclick="changeSpYear(1)">›</button>
+          <button id="sp-year-next" onclick="changeSpYear(1)">›</button>
         </div>
         <button class="today-btn" id="sp-today-btn" onclick="resetSpYear()" style="display:none" data-i18n="sp_this_year">Cette année</button>
         <button class="btn btn-sm btn-primary" onclick="openAddAnnualBillModal()" id="btn-add-annual-bill" data-i18n="btn_add_annual_bill">+ Facture annuelle</button>
@@ -2498,6 +2499,10 @@ const LANG = {
     sp_this_year: 'Cette année',
     tx_reset_filters: '✕ Réinitialiser',
     greeting_night: 'Encore debout',
+    greetings_morning: ["Bonjour", "Bon matin", "Belle matinée", "Content de vous revoir", "Bonne journée"],
+    greetings_afternoon: ["Bon après-midi", "Bonjour", "Content de vous revoir", "Bonne continuation", "J'espère que la journée se passe bien"],
+    greetings_evening: ["Bonsoir", "Belle soirée", "Content de vous revoir", "Bonne fin de journée", "Heureux de vous retrouver"],
+    greetings_night: ["Encore debout", "Soirée tardive", "Oiseau de nuit", "Il se fait tard", "Bonne nuit bientôt"],
   },
   en: {
     s_undo: "Undo",
@@ -2785,6 +2790,10 @@ const LANG = {
     sp_this_year: 'This year',
     tx_reset_filters: '✕ Reset',
     greeting_night: 'Still up',
+    greetings_morning: ["Good morning", "Rise and shine", "Morning", "Welcome back", "Let's start the day"],
+    greetings_afternoon: ["Good afternoon", "Hello", "Welcome back", "Hope your day is going well", "Keep it going"],
+    greetings_evening: ["Good evening", "Evening", "Welcome back", "Hope you had a good day", "Time to wrap up"],
+    greetings_night: ["Still up", "Late night", "Night owl", "Burning the midnight oil", "Working late"],
   },
   ar: {
     s_undo: "تراجع",
@@ -3072,6 +3081,10 @@ const LANG = {
     sp_this_year: 'هذه السنة',
     tx_reset_filters: '✕ إعادة تعيين',
     greeting_night: 'ما زلت مستيقظًا',
+    greetings_morning: ["صباح الخير", "صباح النور", "صباح الورد", "أهلاً بعودتك", "يوم موفق"],
+    greetings_afternoon: ["مساء الخير", "أهلاً بك", "أهلاً بعودتك", "يومك سعيد", "بالتوفيق"],
+    greetings_evening: ["مساء الخير", "مساء النور", "أهلاً بعودتك", "مساؤك سعيد", "طاب مساؤك"],
+    greetings_night: ["ما زلت مستيقظًا", "سهرة موفقة", "وقت متأخر", "طاب سهرك", "ليلة هادئة"],
   },
 };
 
@@ -3410,21 +3423,54 @@ async function verifySentinel(cryptoKey) {
   } catch(e) { return false; } // decryption failure = wrong password
 }
 
+// Restore from the ENCRYPTED backup. Only the correct password can open it, so this is never a bypass.
+// (A legacy plaintext backup is trusted only after the password is verified against the saved check value.)
+async function restoreFromBackup(password, key, backupRaw) {
+  const bp = parseBlob(backupRaw);
+  const prevSalt = localStorage.getItem('mt-salt');
+  let k = key, parsed = null;
+  if (bp.salt && bp.salt !== prevSalt) { localStorage.setItem('mt-salt', bp.salt); k = await deriveKey(password, getSalt()); }
+  if (bp.salt) {
+    try { parsed = JSON.parse(await decryptData(k, bp.blob)); } catch(e) { parsed = null; }
+  } else if (await verifySentinel(k) === true) {
+    try { parsed = JSON.parse(bp.blob); } catch(e) { parsed = null; }
+  }
+  if (!parsed || typeof parsed !== 'object') {
+    if (prevSalt) localStorage.setItem('mt-salt', prevSalt); else localStorage.removeItem('mt-salt');
+    return false;
+  }
+  if (Array.isArray(parsed.expenses))   state.expenses   = parsed.expenses;
+  if (Array.isArray(parsed.incomes))    state.incomes    = parsed.incomes;
+  if (Array.isArray(parsed.categories)) state.categories = parsed.categories.map(c => ({ ...c, color: sanitizeColor(c.color) }));
+  if (parsed.settings && typeof parsed.settings === 'object') state.settings = { ...state.settings, ...parsed.settings };
+  if (Array.isArray(parsed.annualGoals))   state.annualGoals   = parsed.annualGoals;
+  if (Array.isArray(parsed.annualBills))   state.annualBills   = parsed.annualBills;
+  if (Array.isArray(parsed.installments))  state.installments  = parsed.installments;
+  if (parsed.deletedRecurringMonths && typeof parsed.deletedRecurringMonths === 'object') state.deletedRecurringMonths = parsed.deletedRecurringMonths;
+  if (Array.isArray(parsed.savingsWithdrawals)) state.savingsWithdrawals = parsed.savingsWithdrawals;
+  _cryptoKey = k;
+  await storeSentinel(k);
+  await save(); // writes a fresh, healthy main file + backup immediately
+  return true;
+}
+
 async function initWithPassword(password) {
   // Read the disk files first: their header carries the salt, so decryption never
   // depends on localStorage surviving.
-  let diskBlob = null, backupParsed = null;
+  let diskBlob = null, backupRaw = null;
   if (window.electronAPI?.loadData) {
     const result = await window.electronAPI.loadData();
-    if (result.ok) {
+    if (result.ok && result.data && String(result.data).trim()) {
       const p = parseBlob(result.data);
       if (p.salt) localStorage.setItem('mt-salt', p.salt);
       diskBlob = p.blob;
-    } else if (result.reason === 'no-file') {
+    } else if (result.ok || result.reason === 'no-file') {
+      // Main file missing OR empty: look for the backup
       const backup = await window.electronAPI.readBackup();
-      if (backup.ok) {
-        backupParsed = parseBlob(backup.data);
-        if (backupParsed.salt) localStorage.setItem('mt-salt', backupParsed.salt);
+      if (backup.ok && backup.data && String(backup.data).trim()) {
+        backupRaw = backup.data;
+        const bp = parseBlob(backupRaw);
+        if (bp.salt) localStorage.setItem('mt-salt', bp.salt);
       }
     }
   }
@@ -3434,31 +3480,8 @@ async function initWithPassword(password) {
   // ── Step 1: sync the disk file into storage, or auto-restore from the ENCRYPTED backup ──
   if (diskBlob) {
     localStorage.setItem('mt-enc-v1', diskBlob);
-  } else if (backupParsed) {
-    let parsed = null;
-    if (backupParsed.salt) {
-      // Encrypted backup: only the correct password can open it. No bypass.
-      try { parsed = JSON.parse(await decryptData(key, backupParsed.blob)); }
-      catch(e) { return false; }
-    } else if (await verifySentinel(key) === true) {
-      // Legacy plaintext backup: only trusted once the password is verified.
-      try { parsed = JSON.parse(backupParsed.blob); } catch(e) {}
-    }
-    if (parsed) {
-      if (parsed.expenses)   state.expenses   = parsed.expenses;
-      if (parsed.incomes)    state.incomes    = parsed.incomes;
-      if (parsed.categories) state.categories = parsed.categories;
-      if (parsed.settings)   state.settings   = { ...state.settings, ...parsed.settings };
-      if (parsed.annualGoals)   state.annualGoals   = parsed.annualGoals;
-      if (parsed.annualBills)   state.annualBills   = parsed.annualBills;
-      if (parsed.installments)  state.installments  = parsed.installments;
-      if (parsed.deletedRecurringMonths) state.deletedRecurringMonths = parsed.deletedRecurringMonths;
-      if (parsed.savingsWithdrawals)     state.savingsWithdrawals     = parsed.savingsWithdrawals;
-      _cryptoKey = key;
-      await storeSentinel(key);
-      await save(); // write everything to disk immediately
-      return true;
-    }
+  } else if (backupRaw) {
+    return await restoreFromBackup(password, key, backupRaw); // wrong password => false, never a bypass
   }
 
   // ── Step 2: Normal flow — check IDB (primary storage) then fall back to localStorage ──
@@ -3491,8 +3514,15 @@ async function initWithPassword(password) {
 
   // Try decrypting
   const data = await loadDecrypted(key);
-  if (data === null && sentinelResult !== null) return false;
-  if (data === null && sentinelResult === null) return false; // wrong password — can't decrypt data
+  if (data === null) {
+    // Wrong password, OR the main file is corrupted. The encrypted backup settles which:
+    // only the right password can open it.
+    if (window.electronAPI?.readBackup) {
+      const b = await window.electronAPI.readBackup();
+      if (b.ok && b.data && String(b.data).trim() && await restoreFromBackup(password, key, b.data)) return true;
+    }
+    return false;
+  }
 
   _cryptoKey = key;
   state.expenses   = data.expenses   || [];
@@ -3749,7 +3779,12 @@ function escHtml(str) {
 
 // Style 2: Live amount formatter — shows 1,234.56 as you type
 function formatAmountInput(el) {
-  const raw = el.value.replace(/,/g, '');
+  // Commas that the formatter itself inserts are always followed by exactly 3 digits, so a comma followed
+  // by 0-2 digits at the end is a typed DECIMAL comma ("12,5" -> 12.5, "1000,50" -> 1000.50).
+  let v = el.value.replace(/\s/g, '');
+  if (/^\d{1,3}(\.\d{3})+,\d{0,2}$/.test(v)) v = v.replace(/\./g, '').replace(',', '.');   // 1.234,56
+  else if (/,\d{0,2}$/.test(v) && !v.includes('.')) v = v.replace(/,(\d{0,2})$/, '.$1');
+  const raw = v.replace(/,/g, '');
   if (raw === '' || raw === '.') return;
   const num = parseFloat(raw);
   if (isNaN(num)) return;
@@ -3964,24 +3999,35 @@ function renderDashMonthVerdict() {
     </div>`;
 }
 
+const _greetSeed = Math.floor(Math.random() * 5);
 // Time-aware greeting: 5 slots, so it never says "Good morning" at 2 AM, and it stays fresh while the app is open.
 function getGreeting() {
   const h = new Date().getHours();
   const slot = (h >= 22 || h < 5) ? 'night' : h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
   const emoji = { night: '🌙', morning: '☀️', afternoon: '👋', evening: '🌆' }[slot];
   const name = state.settings.name ? ', ' + state.settings.name : '';
-  return t('greeting_' + slot) + name + ' ' + emoji;
+  // One variant per app launch (stable while the app is open, different next time)
+  const list = t('greetings_' + slot);
+  const text = Array.isArray(list) ? list[_greetSeed % list.length] : t('greeting_' + slot);
+  return text + name + ' ' + emoji;
 }
 setInterval(() => {
   const el = document.getElementById('dash-greeting');
   if (el && typeof currentPage !== 'undefined' && currentPage === 'dashboard' && _cryptoKey) el.textContent = getGreeting();
 }, 60000);
 
+// Reads a JSON list from localStorage; a missing or corrupted value gives [] instead of throwing
+function readStoredList(key) {
+  try { const v = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(v) ? v : []; }
+  catch(e) { return []; }
+}
+
 function renderDashboard() {
   const now = new Date();
   document.getElementById('dash-greeting').textContent = getGreeting();
   document.getElementById('dash-sub').textContent = t('financial_overview');
   document.getElementById('dash-month-label').textContent = monthLabel(dashMonth);
+  updateNavLimits('dash', dashMonth);
   document.getElementById('dash-today-btn').style.display = dashMonth !== 0 ? 'inline-block' : 'none';
   document.getElementById('dash-today-btn').textContent = t('today');
 
@@ -4204,6 +4250,7 @@ function renderTopCats(expenses) {
 }
 
 function changeMonth(d) {
+  if (!withinMonthBounds(dashMonth + d)) return;
   dashMonth += d;
   renderDashboard();
 }
@@ -4218,6 +4265,7 @@ function resetMonth() {
 function renderTransactions() {
   document.getElementById('tx-month-label').textContent = monthLabel(txMonth);
   document.getElementById('tx-year-label').textContent = getViewDate(txMonth).getFullYear();
+  updateNavLimits('tx', txMonth);
   document.getElementById('tx-today-btn').style.display = txMonth !== 0 ? 'inline-block' : 'none';
   document.getElementById('tx-today-btn').textContent = t('today');
 
@@ -4395,19 +4443,37 @@ function renderTransactions() {
   }
 }
 
+// Navigation limits: nothing can exist before _DATE_MIN_YEAR (older dates are rejected on entry),
+// and we allow looking as far ahead as isSaneDateStr() accepts dates (_YEAR_FWD_LIMIT years).
+const _YEAR_FWD_LIMIT = 50; // matches isSaneDateStr(): entered dates are accepted up to 50 years ahead
+function monthOffsetBounds() {
+  const n = new Date(), y = n.getFullYear(), m = n.getMonth();
+  return { min: (_DATE_MIN_YEAR - y) * 12 - m, max: _YEAR_FWD_LIMIT * 12 + (11 - m) };
+}
+function withinMonthBounds(o) { const b = monthOffsetBounds(); return o >= b.min && o <= b.max; }
+function updateNavLimits(page, offset) {
+  [['month-prev', -1], ['month-next', 1], ['year-prev', -12], ['year-next', 12]].forEach(([id, step]) => {
+    const btn = document.getElementById(page + '-' + id);
+    if (btn) btn.disabled = !withinMonthBounds(offset + step);
+  });
+}
+
 // Year switch: same month, different year (a month offset of ±12)
 function changeTxYear(d) {
+  if (!withinMonthBounds(txMonth + d * 12)) return;
   txMonth += d * 12;
   const searchEl = document.getElementById('tx-search');
   if (searchEl) searchEl.value = '';
   renderTransactions();
 }
 function changeBillsYear(d) {
+  if (!withinMonthBounds(billsMonth + d * 12)) return;
   billsMonth += d * 12;
   renderBills();
 }
 
 function changeTxMonth(d) {
+  if (!withinMonthBounds(txMonth + d)) return;
   txMonth += d;
   const searchEl = document.getElementById('tx-search');
   if (searchEl) searchEl.value = '';
@@ -4446,6 +4512,7 @@ function filterUncategorized() {
 }
 
 function changeSpYear(d) {
+  if (!withinMonthBounds((spYearOffset + d) * 12)) return;
   spYearOffset += d;
   renderSavingsPlan();
 }
@@ -4459,6 +4526,7 @@ function resetSpYear() {
 // ══════════════════════════════════════════════════════════════════
 function renderCategories() {
   document.getElementById('cat-month-label').textContent = monthLabel(catMonth);
+  updateNavLimits('cat', catMonth);
   document.getElementById('cat-today-btn').style.display = catMonth !== 0 ? 'inline-block' : 'none';
   document.getElementById('cat-today-btn').textContent = t('today');
   document.getElementById('txt-new-cat').textContent = t('new_cat');
@@ -4510,7 +4578,7 @@ function renderCategories() {
   }).join('');
 }
 
-function changeCatMonth(d) { catMonth += d; renderCategories(); }
+function changeCatMonth(d) { if (!withinMonthBounds(catMonth + d)) return; catMonth += d; renderCategories(); }
 function resetCatMonth()   { catMonth  = 0; renderCategories(); }
 
 // ══════════════════════════════════════════════════════════════════
@@ -4519,6 +4587,7 @@ function resetCatMonth()   { catMonth  = 0; renderCategories(); }
 function renderBills() {
   document.getElementById('bills-month-label').textContent = monthLabel(billsMonth);
   document.getElementById('bills-year-label').textContent = getViewDate(billsMonth).getFullYear();
+  updateNavLimits('bills', billsMonth);
   document.getElementById('bills-today-btn').style.display = billsMonth !== 0 ? 'inline-block' : 'none';
   document.getElementById('bills-today-btn').textContent = t('today');
   document.getElementById('layout-btn').textContent = billsGrid ? '☰' : '⊞';
@@ -4692,6 +4761,7 @@ function toggleBillsLayout() {
 }
 
 function changeBillsMonth(d) {
+  if (!withinMonthBounds(billsMonth + d)) return;
   billsMonth += d;
   renderBills();
 }
@@ -4829,7 +4899,13 @@ async function submitAndAddAnother() {
    of extra years and freeze/crash the app.
    Returns the input string if it's a sane calendar date within
    [MIN_YEAR, currentYear+50], otherwise null. */
-const _DATE_MIN_YEAR = 2000;
+const _DATE_MIN_YEAR = new Date().getFullYear() - 50; // symmetric with the +50 limit in isSaneDateStr / _YEAR_FWD_LIMIT
+// Browser date pickers get the same window: 50 years back to 50 years ahead
+['add-date', 'edit-date'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) { el.min = _DATE_MIN_YEAR + '-01-01'; el.max = (new Date().getFullYear() + 50) + '-12-31'; }
+});
+
 function isSaneDateStr(dateStr) {
   if (!dateStr || typeof dateStr !== 'string') return false;
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
@@ -6266,7 +6342,7 @@ function renderSpendingAlerts() {
   // FIX 1: track dashMonth so alerts update with the viewed month, not always month 0
   const isCurrentMonth = dashMonth === 0;
   const dismissKey = 'mt-alerts-dismissed-' + localMonthStr(); // month-scoped
-  const dismissed = isCurrentMonth ? JSON.parse(localStorage.getItem(dismissKey) || '[]') : [];
+  const dismissed = isCurrentMonth ? readStoredList(dismissKey) : [];
 
   const alerts = [];
   const monthExp = getMonthExp(dashMonth);
@@ -6305,7 +6381,7 @@ function renderSpendingAlerts() {
 
 function dismissSpendingAlert(catId) {
   const key = 'mt-alerts-dismissed-' + localMonthStr(); // month-scoped
-  const dismissed = JSON.parse(localStorage.getItem(key) || '[]');
+  const dismissed = readStoredList(key);
   dismissed.push(String(catId));
   localStorage.setItem(key, JSON.stringify(dismissed));
   renderSpendingAlerts();
@@ -6330,7 +6406,7 @@ function renderDueSoonStrips() {
   // Due strips are only relevant for the current month — suppress when browsing history
   if (dashMonth !== 0) { el.innerHTML = ''; return; }
   const dismissedKey = 'mt-due-dismissed-' + localDateStr();
-  const dismissed = JSON.parse(localStorage.getItem(dismissedKey) || '[]');
+  const dismissed = readStoredList(dismissedKey);
 
   const today = new Date();
   const todayDay = today.getDate();
@@ -6407,7 +6483,7 @@ function renderDueSoonStrips() {
 
 function dismissDueStrip(id) {
   const key = 'mt-due-dismissed-' + localDateStr();
-  const dismissed = JSON.parse(localStorage.getItem(key) || '[]');
+  const dismissed = readStoredList(key);
   dismissed.push(String(id));
   localStorage.setItem(key, JSON.stringify(dismissed));
   const strip = document.getElementById('due-strip-' + id);
@@ -6820,9 +6896,8 @@ function getCumulativeAutoSavings(upToYear) {
   const earliest = allDates.reduce((a, b) => a < b ? a : b);
   // SAFETY FIX: clamp firstYear so one corrupted/mistyped date (e.g. year
   // "0001") can never make this loop run across thousands of extra years
-  // and freeze the app. Caps history lookback at 30 years, which comfortably
-  // covers any real usage of this app.
-  const firstYear = Math.max(earliest.getFullYear(), targetYear - 30);
+  // and freeze the app. History is floored at _DATE_MIN_YEAR (dates before it are rejected on entry).
+  const firstYear = Math.max(earliest.getFullYear(), _DATE_MIN_YEAR);
 
   let total = 0;
   for (let yr = firstYear; yr <= targetYear; yr++) {
@@ -6977,6 +7052,7 @@ function renderSavingsPlan() {
   // ── Update year picker UI ──
   const yearLabel = document.getElementById('sp-year-label');
   if (yearLabel) yearLabel.textContent = viewYear;
+  updateNavLimits('sp', spYearOffset * 12);
   const todayBtn = document.getElementById('sp-today-btn');
   if (todayBtn) todayBtn.style.display = spYearOffset !== 0 ? 'inline-block' : 'none';
 
