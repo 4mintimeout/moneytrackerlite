@@ -1328,6 +1328,11 @@ if (!isElectron && 'serviceWorker' in navigator) {
           <span class="ml" id="tx-month-label">—</span>
           <button onclick="changeTxMonth(1)">›</button>
         </div>
+        <div class="month-nav">
+          <button onclick="changeTxYear(-1)">‹</button>
+          <span class="ml" id="tx-year-label">—</span>
+          <button onclick="changeTxYear(1)">›</button>
+        </div>
         <button class="today-btn" id="tx-today-btn" onclick="resetTxMonth()" style="display:none">Aujourd'hui</button>
         <button data-i18n="add_income_btn" class="btn btn-sm" style="background:var(--green-s);color:var(--green)" onclick="openAddModal('income')" id="txt-add-income">+ Revenu</button>
         <button data-i18n="add_expense_btn" class="btn btn-sm" style="background:var(--red-s);color:var(--red)" onclick="openAddModal('expense')" id="txt-add-expense">+ Dépense</button>
@@ -1434,6 +1439,11 @@ if (!isElectron && 'serviceWorker' in navigator) {
           <button onclick="changeBillsMonth(-1)">‹</button>
           <span class="ml" id="bills-month-label">—</span>
           <button onclick="changeBillsMonth(1)">›</button>
+        </div>
+        <div class="month-nav">
+          <button onclick="changeBillsYear(-1)">‹</button>
+          <span class="ml" id="bills-year-label">—</span>
+          <button onclick="changeBillsYear(1)">›</button>
         </div>
         <button class="today-btn" id="bills-today-btn" onclick="resetBillsMonth()" style="display:none">Aujourd'hui</button>
         <button class="btn btn-sm" style="background:var(--red-s);color:var(--red)" onclick="openAddModal('expense')" data-i18n="s_expense_2">+ Dépense</button>
@@ -2487,6 +2497,7 @@ const LANG = {
     btn_add_installment: '+ Paiement échelonné',
     sp_this_year: 'Cette année',
     tx_reset_filters: '✕ Réinitialiser',
+    greeting_night: 'Encore debout',
   },
   en: {
     s_undo: "Undo",
@@ -2773,6 +2784,7 @@ const LANG = {
     btn_add_installment: '+ Installment',
     sp_this_year: 'This year',
     tx_reset_filters: '✕ Reset',
+    greeting_night: 'Still up',
   },
   ar: {
     s_undo: "تراجع",
@@ -3059,6 +3071,7 @@ const LANG = {
     btn_add_installment: '+ دفعة بالتقسيط',
     sp_this_year: 'هذه السنة',
     tx_reset_filters: '✕ إعادة تعيين',
+    greeting_night: 'ما زلت مستيقظًا',
   },
 };
 
@@ -3951,11 +3964,22 @@ function renderDashMonthVerdict() {
     </div>`;
 }
 
+// Time-aware greeting: 5 slots, so it never says "Good morning" at 2 AM, and it stays fresh while the app is open.
+function getGreeting() {
+  const h = new Date().getHours();
+  const slot = (h >= 22 || h < 5) ? 'night' : h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
+  const emoji = { night: '🌙', morning: '☀️', afternoon: '👋', evening: '🌆' }[slot];
+  const name = state.settings.name ? ', ' + state.settings.name : '';
+  return t('greeting_' + slot) + name + ' ' + emoji;
+}
+setInterval(() => {
+  const el = document.getElementById('dash-greeting');
+  if (el && typeof currentPage !== 'undefined' && currentPage === 'dashboard' && _cryptoKey) el.textContent = getGreeting();
+}, 60000);
+
 function renderDashboard() {
   const now = new Date();
-  const hour = now.getHours();
-  const greet = hour < 12 ? t('greeting_morning') : hour < 18 ? t('greeting_afternoon') : t('greeting_evening');
-  document.getElementById('dash-greeting').textContent = `${greet}, ${state.settings.name} 👋`;
+  document.getElementById('dash-greeting').textContent = getGreeting();
   document.getElementById('dash-sub').textContent = t('financial_overview');
   document.getElementById('dash-month-label').textContent = monthLabel(dashMonth);
   document.getElementById('dash-today-btn').style.display = dashMonth !== 0 ? 'inline-block' : 'none';
@@ -4193,6 +4217,7 @@ function resetMonth() {
 // ══════════════════════════════════════════════════════════════════
 function renderTransactions() {
   document.getElementById('tx-month-label').textContent = monthLabel(txMonth);
+  document.getElementById('tx-year-label').textContent = getViewDate(txMonth).getFullYear();
   document.getElementById('tx-today-btn').style.display = txMonth !== 0 ? 'inline-block' : 'none';
   document.getElementById('tx-today-btn').textContent = t('today');
 
@@ -4370,6 +4395,18 @@ function renderTransactions() {
   }
 }
 
+// Year switch: same month, different year (a month offset of ±12)
+function changeTxYear(d) {
+  txMonth += d * 12;
+  const searchEl = document.getElementById('tx-search');
+  if (searchEl) searchEl.value = '';
+  renderTransactions();
+}
+function changeBillsYear(d) {
+  billsMonth += d * 12;
+  renderBills();
+}
+
 function changeTxMonth(d) {
   txMonth += d;
   const searchEl = document.getElementById('tx-search');
@@ -4481,6 +4518,7 @@ function resetCatMonth()   { catMonth  = 0; renderCategories(); }
 // ══════════════════════════════════════════════════════════════════
 function renderBills() {
   document.getElementById('bills-month-label').textContent = monthLabel(billsMonth);
+  document.getElementById('bills-year-label').textContent = getViewDate(billsMonth).getFullYear();
   document.getElementById('bills-today-btn').style.display = billsMonth !== 0 ? 'inline-block' : 'none';
   document.getElementById('bills-today-btn').textContent = t('today');
   document.getElementById('layout-btn').textContent = billsGrid ? '☰' : '⊞';
