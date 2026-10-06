@@ -1,6 +1,12 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
+  // 'win32' / 'darwin' / 'linux' — lets the page adapt its window chrome
+  platform: process.platform,
+
+  // Recolour the Windows title bar / caption buttons to match the theme
+  setTitleBarTheme: (isLight) => ipcRenderer.invoke('set-titlebar-theme', !!isLight),
+
   // App version
   getVersion:  () => ipcRenderer.invoke('get-version'),
 

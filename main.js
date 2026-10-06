@@ -11,7 +11,7 @@ if (!gotLock) {
   app.quit();
 } else {
   app.on('second-instance', () => {
-    // FIX: use showAndLock so the password screen always appears on restore
+    // showAndLock so the password screen always appears on restore
     showAndLock();
   });
 }
@@ -32,14 +32,31 @@ function createWindow() {
       nodeIntegration: false,
     },
     autoHideMenuBar: true,
-    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
+    // Windows: hidden native title bar + native caption buttons (coloured by the theme, see 'set-titlebar-theme').
+    // The page draws its own 32px title strip (#titlebar) which doubles as the drag area.
+    ...(process.platform === 'darwin'
+      ? { titleBarStyle: 'hiddenInset' }
+      : process.platform === 'win32'
+        ? { titleBarStyle: 'hidden', titleBarOverlay: { color: '#07090e', symbolColor: '#f0f2ff', height: 32 } }
+        : {}),
   });
 
   mainWindow.loadFile(path.join(__dirname, 'src', 'index.html'));
-
-  // Only show once the page is fully rendered — eliminates the white flash
-  mainWindow.once('ready-to-show', () => mainWindow.show());
   Menu.setApplicationMenu(null);
+
+  // Show the window as soon as ANY of these happens. On some machines
+  // (hybrid GPU laptops) 'ready-to-show' can fire very late or never,
+  // which left the app running in the tray with no visible window.
+  // backgroundColor above prevents a white flash when showing early.
+  let shown = false;
+  const showOnce = () => {
+    if (shown || !mainWindow || mainWindow.isDestroyed()) return;
+    shown = true;
+    mainWindow.show();
+  };
+  mainWindow.once('ready-to-show', showOnce);
+  mainWindow.webContents.once('did-finish-load', showOnce);
+  setTimeout(showOnce, 3000); // last-resort fallback
 
   // Only plain web links may leave the app (never file:, javascript:, custom protocols...)
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -62,8 +79,7 @@ function createWindow() {
   mainWindow.on('closed', () => { mainWindow = null; });
 
   // ── Crash recovery: if the renderer process dies while the window is
-  //    hidden (the root cause of the "white bar then vanish" bug), reload
-  //    it immediately so the next show() finds a live renderer. ──
+  //    hidden, reload it immediately so the next show() finds a live renderer. ──
   mainWindow.webContents.on('render-process-gone', (_event, details) => {
     console.error('[renderer] process gone — reason:', details.reason);
     if (mainWindow && !mainWindow.isDestroyed()) {
@@ -77,18 +93,16 @@ function createWindow() {
       mainWindow.reload();
     }
   });
+
+  mainWindow.webContents.on('did-fail-load', (_e, code, desc, url) => {
+    console.error('[load fail]', code, desc, url);
+  });
 }
 
 // ── Show the existing window or recreate it if it was destroyed ──
-// ROOT FIX for the "white bar then vanish" bug:
-//
 // When the user clicks X the window hides to the tray (not destroyed).
 // While hidden, Electron can kill the renderer process to reclaim memory.
-// mainWindow still exists as a JS object but its webContents are dead.
-// Calling mainWindow.show() on that produces the 1-second white flash,
-// then the window vanishes. The user had to reboot to reset this state.
-//
-// Fix: check isCrashed() before showing — reload if needed, or rebuild
+// Check isCrashed() before showing — reload if needed, or rebuild
 // the whole window if the object itself is gone.
 function showOrRecreate() {
   if (!mainWindow || mainWindow.isDestroyed()) {
@@ -110,7 +124,7 @@ function showAndLock() {
     // If the page is still loading (e.g. after a crash/reload), wait for it
     if (mainWindow.webContents.isLoading()) {
       mainWindow.webContents.once('did-finish-load', () => {
-        mainWindow.webContents.send('lock-app');
+        if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('lock-app');
       });
     } else {
       mainWindow.webContents.send('lock-app');
@@ -120,8 +134,16 @@ function showAndLock() {
 
 // ── Tray ──
 function createTray() {
-  const icon = nativeImage.createFromPath(path.join(__dirname, 'build', 'icon.ico'));
-  tray = new Tray(icon);
+  const iconPath = path.join(__dirname, 'build', 'icon.ico');
+  const icon = fs.existsSync(iconPath)
+    ? nativeImage.createFromPath(iconPath)
+    : nativeImage.createEmpty();
+  try {
+    tray = new Tray(icon);
+  } catch (e) {
+    console.error('[tray] failed to create tray:', e.message);
+    return;
+  }
   tray.setToolTip('MoneyTracker Lite');
 
   const contextMenu = Menu.buildFromTemplate([
@@ -139,6 +161,7 @@ function createTray() {
 
 // ── App lifecycle ──
 app.whenReady().then(() => {
+  if (!gotLock) return; // a second instance must not build a window
   createWindow();
   createTray();
   app.on('activate', () => {
@@ -172,7 +195,7 @@ function atomicWrite(filePath, tmpFilePath, content) {
 ipcMain.handle('get-version', () => app.getVersion());
 
 // Save: writes the encrypted blob as the primary data file (no 5MB limit,
-// crash-safe). Also writes a plaintext JSON backup alongside it.
+// crash-safe). Also writes a backup alongside it.
 ipcMain.handle('save-data', async (event, encryptedBlob, backupJson) => {
   try {
     const dir = app.getPath('userData');
@@ -181,7 +204,7 @@ ipcMain.handle('save-data', async (event, encryptedBlob, backupJson) => {
     // Primary encrypted file
     atomicWrite(dataPath(), tmpPath(), encryptedBlob);
 
-    // Plaintext backup (used for auto-restore and manual recovery)
+    // Backup (used for auto-restore and manual recovery)
     if (backupJson) atomicWrite(backupPath(), backupTmp(), backupJson);
 
     return { ok: true };
@@ -203,7 +226,7 @@ ipcMain.handle('load-data', async () => {
   }
 });
 
-// Read the plaintext backup (auto-restore when primary file is missing)
+// Read the backup (auto-restore when primary file is missing)
 ipcMain.handle('read-backup', async () => {
   try {
     const file = backupPath();
@@ -228,6 +251,16 @@ ipcMain.handle('get-paths', () => ({
 ipcMain.handle('quit-app', () => {
   app.isQuiting = true;
   app.quit();
+});
+
+// Recolour the native caption buttons / title strip to match the app theme (Windows only)
+ipcMain.handle('set-titlebar-theme', (event, isLight) => {
+  if (process.platform !== 'win32' || !mainWindow || mainWindow.isDestroyed()) return;
+  mainWindow.setTitleBarOverlay({
+    color:       isLight ? '#d3d8e3' : '#07090e',   // = --bg-base in each theme
+    symbolColor: isLight ? '#121520' : '#f0f2ff',
+    height: 32,
+  });
 });
 
 // Hard relaunch — fully restarts the Electron process so no stale JS
