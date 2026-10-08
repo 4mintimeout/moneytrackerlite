@@ -2,8 +2,11 @@
 
 [![Ko-fi](https://img.shields.io/badge/Support-Ko--fi-red)](https://ko-fi.com/4mintimeout)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Status: Active development](https://img.shields.io/badge/Status-Active%20development-orange)](../../commits)
 
 A free, offline, fully-encrypted personal finance tracker for Windows. Log expenses and income, track recurring transactions, plan savings, and manage budgets — all stored locally on your machine, encrypted, no account, no cloud, no tracking.
+
+> 🚧 **Work in progress.** MoneyTracker Lite is under active development: features are being added, polished and tested, and things may change between releases. Feedback and bug reports are welcome via [Issues](../../issues).
 
 ![screenshot placeholder](docs/screenshot.png)
 
@@ -14,7 +17,7 @@ A free, offline, fully-encrypted personal finance tracker for Windows. Log expen
 - 🔁 Recurring transactions
 - 🎯 Savings goals
 - 📊 Monthly dashboard & spending breakdowns
-- 🌐 Duo-language support
+- 🌐 Multi-language: English, Français and العربية (with right-to-left layout)
 
 ## Annual Savings Plan
 
@@ -37,6 +40,19 @@ Supported so far: Monzo, Starling, Barclays, HSBC, Lloyds/Halifax, and NatWest/R
 How it works: export your transactions from your bank's app or online banking (usually under Statements or Export), then drag the file into MoneyTracker Lite or click to browse for it.
 Nothing gets added blindly. Before anything is saved, you get a preview of the incoming transactions and a duplicate check — if a transaction looks like it might already be in your records, you'll be asked what to do rather than ending up with double entries.
 Your export never leaves your computer. Like everything else in the app, the file is parsed and imported locally — nothing is uploaded anywhere.
+
+## Status & roadmap
+
+Currently being worked on:
+
+- [x] Encrypted storage and automatic encrypted backup
+- [x] Annual Savings Plan, installments and payment reminders
+- [x] English, French and Arabic
+- [ ] Splitting the code into separate files for easier maintenance
+- [ ] More bank formats for Bank Import
+- [ ] Code-signed installer
+
+Have an idea or found a bug? Please [open an issue](../../issues).
 
 ## Download
 
