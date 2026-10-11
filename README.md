@@ -41,19 +41,6 @@ How it works: export your transactions from your bank's app or online banking (u
 Nothing gets added blindly. Before anything is saved, you get a preview of the incoming transactions and a duplicate check — if a transaction looks like it might already be in your records, you'll be asked what to do rather than ending up with double entries.
 Your export never leaves your computer. Like everything else in the app, the file is parsed and imported locally — nothing is uploaded anywhere.
 
-## Status & roadmap
-
-Currently being worked on:
-
-- [x] Encrypted storage and automatic encrypted backup
-- [x] Annual Savings Plan, installments and payment reminders
-- [x] English, French and Arabic
-- [ ] Splitting the code into separate files for easier maintenance
-- [ ] More bank formats for Bank Import
-- [ ] Code-signed installer
-
-Have an idea or found a bug? Please [open an issue](../../issues).
-
 ## Download
 
 Grab the latest installer from the [Releases](../../releases) page.
