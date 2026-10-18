@@ -21,7 +21,7 @@ A free, offline, fully-encrypted personal finance tracker for Windows. Log expen
 
 ## Annual Savings Plan
 
-Most expense trackers only show you the past — what you already spent. The Annual Savings Plan shows you the whole year at once, so you can actually plan ahead instead of reacting month to month.
+Most expense trackers only show you the past what you already spent. The Annual Savings Plan shows you the whole year at once, so you can actually plan ahead instead of reacting month to month.
 
 Here's how it helps:
 
@@ -30,7 +30,7 @@ Know how much you're really saving — not just this month, but overall. The pla
 Catch a bad month early. Each month is broken down with its own income, expenses, and balance, so if spending creeps up, you'll see it in that month's card instead of finding out three months later when your savings goal falls short.
 Plan around irregular, one-off expenses. Life events (holidays, annual insurance, a big seasonal purchase) rarely land evenly across the year, this view is built for exactly that kind of lumpy, real-life spending, not just a flat monthly average.
 
-In short: instead of asking "how much did I spend this month," it answers the more useful question — "am I actually on track for the year?"
+In short: instead of asking "how much did I spend this month," it answers the more useful question  "am I actually on track for the year?"
 
 ## Bank Import
 
