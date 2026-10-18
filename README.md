@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Status: Active development](https://img.shields.io/badge/Status-Active%20development-orange)](../../commits)
 
-A free, offline, fully-encrypted personal finance tracker for Windows. Log expenses and income, track recurring transactions, plan savings, and manage budgets — all stored locally on your machine, encrypted, no account, no cloud, no tracking.
+A free, offline, fully-encrypted personal finance tracker for Windows. Log expenses and income, track recurring transactions, plan savings, and manage budgets all stored locally on your machine, encrypted, no account, no cloud, no tracking.
 
 > 🚧 **Work in progress.** MoneyTracker Lite is under active development: features are being added, polished and tested, and things may change between releases. Feedback and bug reports are welcome via [Issues](../../issues).
 
